@@ -1,0 +1,12 @@
+---
+- name: Add Trivy repository
+  ansible.builtin.get_url:
+    url: https://aquasecurity.github.io/trivy-repo/rpm/releases/trivy.repo
+    dest: /etc/yum.repos.d/trivy.repo
+    mode: '0644'
+
+- name: Install Trivy
+  ansible.builtin.dnf:
+    name: trivy
+    state: present
+    update_cache: true
