@@ -21,7 +21,7 @@ services:
 
   auth-service:
     build:
-      context: ./auth-service
+      context: ./iVolveFinalProject/auth-service
     environment:
       DB_HOST: mysql
       DB_PORT: 3306
@@ -38,7 +38,7 @@ services:
 
   roadmap-service:
     build:
-      context: ./roadmap-service
+      context: ./iVolveFinalProject/roadmap-service
     ports:
       - "8081:8080"
     networks:
@@ -46,7 +46,7 @@ services:
 
   frontend:
     build:
-      context: ./frontend
+      context: ./iVolveFinalProject/frontend
     environment:
       AUTH_SERVICE_URL: http://auth-service:5000
       ROADMAP_SERVICE_URL: http://roadmap-service:8080
