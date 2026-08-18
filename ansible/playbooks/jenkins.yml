@@ -1,6 +1,6 @@
 ---
 - name: Configure Jenkins EC2
-  hosts: "tag_Role_Jenkins"
+  hosts: role_Jenkins
   become: true
 
   roles:

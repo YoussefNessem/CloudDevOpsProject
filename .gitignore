@@ -1,0 +1,26 @@
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+
+# Ansible
+*.retry
+
+# Secrets / Environment
+.env
+.env.*
+*.pem
+*.key
+
+# OS / Editor
+.DS_Store
+.vscode/
+.idea/
+
+# Terraform state
+terraform.tfstate
+terraform.tfstate.*
+terraform/.terraform/
+terraform/*.tfstate
+terraform/*.tfstate.*
+terraform/*.tfplan

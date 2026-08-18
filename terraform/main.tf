@@ -55,6 +55,9 @@ module "eks" {
   vpc_id             = module.network.vpc_id
   private_subnet_ids = module.network.private_subnet_ids
 
+  jenkins_security_group_id = module.server.jenkins_security_group_id
+  jenkins_role_arn          = module.server.jenkins_role_arn
+
   cluster_version    = "1.33"
   node_instance_type = "t3.small"
   node_desired_size  = 2

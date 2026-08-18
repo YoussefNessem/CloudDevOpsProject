@@ -16,6 +16,19 @@
     state: present
     update_cache: true
 
+- name: Configure Jenkins to use Java 21
+  ansible.builtin.copy:
+    dest: /etc/sysconfig/jenkins
+    content: |
+      JENKINS_JAVA_CMD=/usr/lib/jvm/java-21-amazon-corretto.x86_64/bin/java
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Reload systemd
+  ansible.builtin.systemd:
+    daemon_reload: true
+
 - name: Enable and start Jenkins
   ansible.builtin.systemd:
     name: jenkins

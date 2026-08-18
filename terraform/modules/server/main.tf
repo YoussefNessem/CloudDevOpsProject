@@ -5,13 +5,13 @@
 # -------------------------
 
 resource "aws_key_pair" "jenkins" {
-key_name   = "${var.project_name}-jenkins-key"
-public_key = file(pathexpand("~/.ssh/ivolve-key.pub"))
+  key_name   = "${var.project_name}-jenkins-key"
+  public_key = file(pathexpand("~/.ssh/ivolve-key.pub"))
 
-tags = {
-Name    = "${var.project_name}-jenkins-key"
-Project = var.project_name
-}
+  tags = {
+    Name    = "${var.project_name}-jenkins-key"
+    Project = var.project_name
+  }
 }
 
 # -------------------------
@@ -21,29 +21,29 @@ Project = var.project_name
 # -------------------------
 
 resource "aws_iam_role" "jenkins" {
-name = "${var.project_name}-jenkins-role"
+  name = "${var.project_name}-jenkins-role"
 
-assume_role_policy = jsonencode({
-Version = "2012-10-17"
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
 
-Statement = [
-  {
-    Effect = "Allow"
+    Statement = [
+      {
+        Effect = "Allow"
 
-    Principal = {
-      Service = "ec2.amazonaws.com"
-    }
+        Principal = {
+          Service = "ec2.amazonaws.com"
+        }
 
-    Action = "sts:AssumeRole"
+        Action = "sts:AssumeRole"
+      }
+    ]
+
+  })
+
+  tags = {
+    Name    = "${var.project_name}-jenkins-role"
+    Project = var.project_name
   }
-]
-
-})
-
-tags = {
-Name    = "${var.project_name}-jenkins-role"
-Project = var.project_name
-}
 }
 
 # -------------------------
@@ -53,57 +53,57 @@ Project = var.project_name
 # -------------------------
 
 resource "aws_iam_role_policy" "jenkins" {
-name = "${var.project_name}-jenkins-policy"
-role = aws_iam_role.jenkins.id
+  name = "${var.project_name}-jenkins-policy"
+  role = aws_iam_role.jenkins.id
 
-policy = jsonencode({
-Version = "2012-10-17"
+  policy = jsonencode({
+    Version = "2012-10-17"
 
-Statement = [
+    Statement = [
 
-  # ECR permissions for Docker push/pull
-  {
-    Effect = "Allow"
+      # ECR permissions for Docker push/pull
+      {
+        Effect = "Allow"
 
-    Action = [
-      "ecr:GetAuthorizationToken",
-      "ecr:BatchCheckLayerAvailability",
-      "ecr:CompleteLayerUpload",
-      "ecr:InitiateLayerUpload",
-      "ecr:PutImage",
-      "ecr:UploadLayerPart",
-      "ecr:BatchGetImage",
-      "ecr:GetDownloadUrlForLayer"
+        Action = [
+          "ecr:GetAuthorizationToken",
+          "ecr:BatchCheckLayerAvailability",
+          "ecr:CompleteLayerUpload",
+          "ecr:InitiateLayerUpload",
+          "ecr:PutImage",
+          "ecr:UploadLayerPart",
+          "ecr:BatchGetImage",
+          "ecr:GetDownloadUrlForLayer"
+        ]
+
+        Resource = "*"
+      },
+
+      # EKS permissions required by AWS CLI / kubectl
+      {
+        Effect = "Allow"
+
+        Action = [
+          "eks:DescribeCluster",
+          "eks:ListClusters"
+        ]
+
+        Resource = "*"
+      },
+
+      # STS identity used by AWS authentication
+      {
+        Effect = "Allow"
+
+        Action = [
+          "sts:GetCallerIdentity"
+        ]
+
+        Resource = "*"
+      }
     ]
 
-    Resource = "*"
-  },
-
-  # EKS permissions required by AWS CLI / kubectl
-  {
-    Effect = "Allow"
-
-    Action = [
-      "eks:DescribeCluster",
-      "eks:ListClusters"
-    ]
-
-    Resource = "*"
-  },
-
-  # STS identity used by AWS authentication
-  {
-    Effect = "Allow"
-
-    Action = [
-      "sts:GetCallerIdentity"
-    ]
-
-    Resource = "*"
-  }
-]
-
-})
+  })
 }
 
 # -------------------------
@@ -113,13 +113,13 @@ Statement = [
 # -------------------------
 
 resource "aws_iam_instance_profile" "jenkins" {
-name = "${var.project_name}-jenkins-profile"
-role = aws_iam_role.jenkins.name
+  name = "${var.project_name}-jenkins-profile"
+  role = aws_iam_role.jenkins.name
 
-tags = {
-Name    = "${var.project_name}-jenkins-profile"
-Project = var.project_name
-}
+  tags = {
+    Name    = "${var.project_name}-jenkins-profile"
+    Project = var.project_name
+  }
 }
 
 # -------------------------
@@ -129,47 +129,47 @@ Project = var.project_name
 # -------------------------
 
 resource "aws_security_group" "jenkins" {
-name        = "${var.project_name}-jenkins-sg"
-description = "Security group for Jenkins server"
-vpc_id      = var.vpc_id
+  name        = "${var.project_name}-jenkins-sg"
+  description = "Security group for Jenkins server"
+  vpc_id      = var.vpc_id
 
-ingress {
-description = "SSH"
+  ingress {
+    description = "SSH"
 
-from_port = 22
-to_port   = 22
-protocol  = "tcp"
+    from_port = 22
+    to_port   = 22
+    protocol  = "tcp"
 
-cidr_blocks = [var.ssh_cidr]
+    cidr_blocks = [var.ssh_cidr]
 
-}
+  }
 
-ingress {
-description = "Jenkins"
+  ingress {
+    description = "Jenkins"
 
-from_port = 8080
-to_port   = 8080
-protocol  = "tcp"
+    from_port = 8080
+    to_port   = 8080
+    protocol  = "tcp"
 
-cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = ["0.0.0.0/0"]
 
-}
+  }
 
-egress {
-description = "Allow all outbound traffic"
+  egress {
+    description = "Allow all outbound traffic"
 
-from_port = 0
-to_port   = 0
-protocol  = "-1"
+    from_port = 0
+    to_port   = 0
+    protocol  = "-1"
 
-cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = ["0.0.0.0/0"]
 
-}
+  }
 
-tags = {
-Name    = "${var.project_name}-jenkins-sg"
-Project = var.project_name
-}
+  tags = {
+    Name    = "${var.project_name}-jenkins-sg"
+    Project = var.project_name
+  }
 }
 
 # -------------------------
@@ -179,23 +179,23 @@ Project = var.project_name
 # -------------------------
 
 resource "aws_instance" "jenkins" {
-ami           = var.ami_id
-instance_type = var.instance_type
+  ami           = var.ami_id
+  instance_type = var.instance_type
 
-subnet_id              = var.public_subnet_id
-key_name               = aws_key_pair.jenkins.key_name
-vpc_security_group_ids = [aws_security_group.jenkins.id]
+  subnet_id              = var.public_subnet_id
+  key_name               = aws_key_pair.jenkins.key_name
+  vpc_security_group_ids = [aws_security_group.jenkins.id]
 
-associate_public_ip_address = true
+  associate_public_ip_address = true
 
-# Attach Jenkins IAM Role
+  # Attach Jenkins IAM Role
 
-iam_instance_profile = aws_iam_instance_profile.jenkins.name
+  iam_instance_profile = aws_iam_instance_profile.jenkins.name
 
-tags = {
-Name    = "${var.project_name}-jenkins"
-Project = var.project_name
-Role    = "Jenkins"
-}
+  tags = {
+    Name    = "${var.project_name}-jenkins"
+    Project = var.project_name
+    Role    = "Jenkins"
+  }
 }
 

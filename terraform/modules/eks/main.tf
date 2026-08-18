@@ -42,6 +42,12 @@ resource "aws_eks_cluster" "this" {
   role_arn = aws_iam_role.eks_cluster.arn
   version  = var.cluster_version
 
+  # Enable EKS Access Entries
+  access_config {
+    authentication_mode                         = "API_AND_CONFIG_MAP"
+    bootstrap_cluster_creator_admin_permissions = true
+  }
+
   vpc_config {
     subnet_ids              = var.private_subnet_ids
     endpoint_private_access = true
@@ -56,6 +62,36 @@ resource "aws_eks_cluster" "this" {
     Name    = "${var.project_name}-eks"
     Project = var.project_name
   }
+}
+
+
+# =========================================================
+# Jenkins IAM Role Access to EKS
+# =========================================================
+
+resource "aws_eks_access_entry" "jenkins" {
+  cluster_name  = aws_eks_cluster.this.name
+  principal_arn = var.jenkins_role_arn
+  type          = "STANDARD"
+
+  depends_on = [
+    aws_eks_cluster.this
+  ]
+}
+
+resource "aws_eks_access_policy_association" "jenkins_admin" {
+  cluster_name  = aws_eks_cluster.this.name
+  principal_arn = var.jenkins_role_arn
+
+  policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
+
+  access_scope {
+    type = "cluster"
+  }
+
+  depends_on = [
+    aws_eks_access_entry.jenkins
+  ]
 }
 
 
@@ -239,4 +275,20 @@ resource "aws_eks_addon" "ebs_csi" {
     aws_iam_role_policy_attachment.ebs_csi,
     aws_eks_node_group.this
   ]
+}
+
+
+# =========================================================
+# Jenkins Security Group -> EKS API
+# =========================================================
+
+resource "aws_vpc_security_group_ingress_rule" "jenkins_to_eks_api" {
+  security_group_id            = aws_eks_cluster.this.vpc_config[0].cluster_security_group_id
+  referenced_security_group_id = var.jenkins_security_group_id
+
+  from_port   = 443
+  to_port     = 443
+  ip_protocol = "tcp"
+
+  description = "Allow Jenkins EC2 to access EKS API"
 }

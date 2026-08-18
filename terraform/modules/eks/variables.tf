@@ -42,3 +42,13 @@ variable "node_max_size" {
   type        = number
   default     = 2
 }
+
+variable "jenkins_security_group_id" {
+  description = "Security Group ID for Jenkins EC2"
+  type        = string
+}
+
+variable "jenkins_role_arn" {
+  description = "IAM Role ARN for Jenkins EC2"
+  type        = string
+}
