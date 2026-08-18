@@ -1,4 +1,5 @@
 # CloudDevOpsProject
+# iVolveFinalProject
 
 ## 1. Project Overview
 
@@ -951,11 +952,16 @@ Worker Nodes Ready
 
 ---
 
-# 21. Repository
+## Source Project
 
-GitHub Repository:
+This project is based on the original iVolve Final Project repository provided by the instructor:
 
-https://github.com/YoussefNessem/CloudDevOpsProject
+**Original Repository:**
+https://github.com/Ibrahim-Adel15/iVolveFinalProject.git
+
+The application source code was used as the foundation for implementing the Cloud DevOps infrastructure, containerization, CI/CD pipeline, Kubernetes deployment, and GitOps workflow demonstrated in this repository.
+
+The DevOps implementation, infrastructure configuration, automation, and deployment workflow were developed as part of this project.
 
 ---
 
